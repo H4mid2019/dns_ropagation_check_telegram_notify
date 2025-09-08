@@ -27,11 +27,11 @@ jobs:
           go-version: "1.22"
 
       - name: Build DNS Checker for CI
-        run: go build -v -o dns-checker-ci ./dns-checker-ci
+        run: go build -v -o dns-checker ./dns-checker-ci
 
       - name: Run DNS Checker
 
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: ./dns-checker-ci --domain ${{ env.TARGET_DOMAIN }}
+        run: ./dns-checker --domain ${{ env.TARGET_DOMAIN }}
