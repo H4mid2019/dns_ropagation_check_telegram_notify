@@ -17,7 +17,7 @@ import (
 type telegramMessage struct {
 	ChatID    string `json:"chat_id"`
 	Text      string `json:"text"`
-	ParseMode string `json:"parse_mode"` // Enables Markdown formatting
+	ParseMode string `json:"parse_mode"`
 }
 
 // sendTelegramMessage sends a message via the Telegram Bot API.
@@ -56,21 +56,23 @@ type discoveryState struct {
 }
 
 func main() {
-	// --- Command-line flag for the domain ---
 	domain := flag.String("domain", "", "The domain name to check (e.g., google.com)")
 	dnsServer := flag.String("dns", "1.1.1.1:53", "The DNS server to use (host:port)")
 	interval := flag.Int("interval", 60, "Interval in minutes between checks")
 	flag.Parse()
 
-	// Exit if the domain flag is not provided.
 	if *domain == "" {
 		log.Println("Error: The --domain flag is required.")
-		os.Exit(1) // Exits with a non-zero status code.
+		os.Exit(1)
 	}
 
-	// --- Configuration ---
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 	chatID := os.Getenv("TELEGRAM_CHAT_ID")
+	if botToken == "" || chatID == "" {
+		log.Println("Error: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set.")
+		os.Exit(1)
+	}
+
 	if dnsServer == nil || *dnsServer == "" {
 		*dnsServer = "1.1.1.1:53"
 	}
