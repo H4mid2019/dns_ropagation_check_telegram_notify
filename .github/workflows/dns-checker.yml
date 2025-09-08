@@ -10,9 +10,6 @@ on:
 
   workflow_dispatch:
 
-env:
-  TARGET_DOMAIN: google.com
-
 jobs:
   build-and-run-checker:
     runs-on: ubuntu-latest
@@ -34,4 +31,4 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: ./dns-checker --domain $TARGET_DOMAIN
+        run: ./dns-checker --domain ${{ env.TARGET_DOMAIN }}
