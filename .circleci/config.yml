@@ -34,4 +34,6 @@ workflows:
               only:
                 - main
     jobs:
-      - build-and-run-poller
+      - build-and-run-poller:
+          context:
+            - telegram_creds
