@@ -9,10 +9,10 @@ jobs:
       - checkout
       - run:
           name: "Build CI DNS Checker"
-          command: go build -v -o dns-checker-ci ./cmd/dns-checker-ci
+          command: go build -v -o dns-checker ./dns-checker-ci
       - run:
           name: "Run DNS Checker for $TARGET_DOMAIN"
-          command: ./dns-checker-ci --domain $TARGET_DOMAIN
+          command: ./dns-checker --domain $TARGET_DOMAIN
 
 workflows:
   version: 2
