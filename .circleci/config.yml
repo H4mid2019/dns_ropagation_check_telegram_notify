@@ -1,24 +1,30 @@
 version: 2.1
 
 jobs:
+  # This job definition remains unchanged.
   build-and-run-poller:
     docker:
       - image: cimg/go:1.22
     steps:
       - checkout
-
       - run:
           name: "Build CI DNS Checker"
-          command: |
-            go build -v -o dns-checker-ci ./dns-checker-ci
-
+          command: go build -v -o dns-checker-ci ./cmd/dns-checker-ci
       - run:
           name: "Run DNS Checker for $TARGET_DOMAIN"
-          command: |
-            ./dns-checker-ci --domain $TARGET_DOMAIN
+          command: ./dns-checker-ci --domain $TARGET_DOMAIN
 
 workflows:
   version: 2
+
+  run-on-push:
+    jobs:
+      - build-and-run-poller:
+          filters:
+            branches:
+              only:
+                - main
+
   hourly_dns_check:
     triggers:
       - schedule:
