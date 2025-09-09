@@ -20,6 +20,8 @@ workflows:
   run-on-push:
     jobs:
       - build-and-run-poller:
+          context:
+            - telegram_creds
           filters:
             branches:
               only:
