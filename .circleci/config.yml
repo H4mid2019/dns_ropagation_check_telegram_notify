@@ -12,7 +12,7 @@ jobs:
           command: go build -v -o dns-checker ./dns-checker-ci
       - run:
           name: "Run DNS Checker for $TARGET_DOMAINS"
-          command: ./dns-checker --domain $TARGET_DOMAINS
+          command: ./dns-checker --domains $TARGET_DOMAINS
 
 workflows:
   version: 2
