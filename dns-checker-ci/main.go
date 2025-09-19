@@ -42,12 +42,24 @@ func sendTelegramMessage(botToken, chatID, text string) error {
 
 func main() {
 	// --- Read configuration ---
-	domain := flag.String("domain", "", "The domain name to check")
+	domainsFlag := flag.String("domains", "", "Comma-separated domain names to check (e.g. 'example.com,foo.com')")
 	dnsServer := flag.String("dns", "1.1.1.1:53", "The DNS server to use (host:port)")
 	flag.Parse()
 
-	if *domain == "" {
-		log.Fatal("Error: The --domain flag is required.")
+	if *domainsFlag == "" {
+		log.Fatal("Error: The --domains flag is required.")
+		os.Exit(1)
+	}
+
+	domains := []string{}
+	for _, d := range bytes.Split([]byte(*domainsFlag), []byte{','}) {
+		trimmed := string(bytes.TrimSpace(d))
+		if trimmed != "" {
+			domains = append(domains, trimmed)
+		}
+	}
+	if len(domains) == 0 {
+		log.Fatal("Error: No valid domains provided.")
 		os.Exit(1)
 	}
 
@@ -70,51 +82,54 @@ func main() {
 		},
 	}
 
-	log.Printf("Performing a single DNS check for %s...", *domain)
+	for _, domain := range domains {
+		log.Printf("Performing DNS check for %s...", domain)
 
-	// --- Check for A records ---
-	ips, err := resolver.LookupIP(context.Background(), "ip4", *domain)
-	if err == nil && len(ips) > 0 {
-		log.Println("Found A records. Sending notification.")
-		messageText := fmt.Sprintf("✅ *A records found for %s*\n", *domain)
-		for _, ip := range ips {
-			messageText += fmt.Sprintf("  - `%s`\n", ip.String())
+		// --- Check for A records ---
+		ips, err := resolver.LookupIP(context.Background(), "ip4", domain)
+		if err == nil && len(ips) > 0 {
+			log.Println("Found A records. Sending notification.")
+			messageText := fmt.Sprintf("✅ *A records found for %s*\n", domain)
+			for _, ip := range ips {
+				messageText += fmt.Sprintf("  - `%s`\n", ip.String())
+			}
+			if err := sendTelegramMessage(botToken, chatID, messageText); err != nil {
+				log.Printf("Error sending Telegram notification: %v", err)
+			}
+		} else {
+			log.Println("A records not found.")
 		}
-		if err := sendTelegramMessage(botToken, chatID, messageText); err != nil {
-			log.Printf("Error sending Telegram notification: %v", err)
-		}
-	} else {
-		log.Println("A records not found.")
-	}
 
-	// --- Check for NS records ---
-	ns, err := resolver.LookupNS(context.Background(), *domain)
-	if err == nil && len(ns) > 0 {
-		log.Println("Found NS records. Sending notification.")
-		messageText := fmt.Sprintf("✅ *NS records found for %s*\n", *domain)
-		for _, n := range ns {
-			messageText += fmt.Sprintf("  - `%s`\n", n.Host)
+		// --- Check for NS records ---
+		ns, err := resolver.LookupNS(context.Background(), domain)
+		if err == nil && len(ns) > 0 {
+			log.Println("Found NS records. Sending notification.")
+			messageText := fmt.Sprintf("✅ *NS records found for %s*\n", domain)
+			for _, n := range ns {
+				messageText += fmt.Sprintf("  - `%s`\n", n.Host)
+			}
+			if err := sendTelegramMessage(botToken, chatID, messageText); err != nil {
+				log.Printf("Error sending Telegram notification: %v", err)
+			}
+		} else {
+			log.Println("NS records not found.")
 		}
-		if err := sendTelegramMessage(botToken, chatID, messageText); err != nil {
-			log.Printf("Error sending Telegram notification: %v", err)
-		}
-	} else {
-		log.Println("NS records not found.")
-	}
 
-	// --- Check for MX records ---
-	mx, err := resolver.LookupMX(context.Background(), *domain)
-	if err == nil && len(mx) > 0 {
-		log.Println("Found MX records. Sending notification.")
-		messageText := fmt.Sprintf("✅ *MX records found for %s*\n", *domain)
-		for _, m := range mx {
-			messageText += fmt.Sprintf("  - Host: `%s`, Pref: %d\n", m.Host, m.Pref)
+		// --- Check for MX records ---
+		mx, err := resolver.LookupMX(context.Background(), domain)
+		if err == nil && len(mx) > 0 {
+			log.Println("Found MX records. Sending notification.")
+			messageText := fmt.Sprintf("✅ *MX records found for %s*\n", domain)
+			for _, m := range mx {
+				messageText += fmt.Sprintf("  - Host: `%s`, Pref: %d\n", m.Host, m.Pref)
+			}
+			if err := sendTelegramMessage(botToken, chatID, messageText); err != nil {
+				log.Printf("Error sending Telegram notification: %v", err)
+			}
+		} else {
+			log.Println("MX records not found.")
 		}
-		if err := sendTelegramMessage(botToken, chatID, messageText); err != nil {
-			log.Printf("Error sending Telegram notification: %v", err)
-		}
-	} else {
-		log.Println("MX records not found.")
+
 	}
 
 	log.Println("DNS check complete. Exiting.")

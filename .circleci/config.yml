@@ -11,8 +11,8 @@ jobs:
           name: "Build CI DNS Checker"
           command: go build -v -o dns-checker ./dns-checker-ci
       - run:
-          name: "Run DNS Checker for $TARGET_DOMAIN"
-          command: ./dns-checker --domain $TARGET_DOMAIN
+          name: "Run DNS Checker for $TARGET_DOMAINS"
+          command: ./dns-checker --domain $TARGET_DOMAINS
 
 workflows:
   version: 2
