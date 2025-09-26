@@ -27,15 +27,15 @@ workflows:
               only:
                 - main
 
-  hourly_dns_check:
-    triggers:
-      - schedule:
-          cron: "0 * * * *"
-          filters:
-            branches:
-              only:
-                - main
-    jobs:
-      - build-and-run-poller:
-          context:
-            - telegram_creds
+  # hourly_dns_check:
+  #   triggers:
+  #     - schedule:
+  #         cron: "0 * * * *"
+  #         filters:
+  #           branches:
+  #             only:
+  #               - main
+  #  jobs:
+  #    - build-and-run-poller:
+  #        context:
+  #          - telegram_creds
